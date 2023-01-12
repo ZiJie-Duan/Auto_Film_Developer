@@ -21,10 +21,11 @@ int pwm_on=0;
 int pwm_off=20;
 int direction = 1;
 
+int loop_times = 0;
 int state = 0;
 
 void change_direction(int direction);
-
+int abs(int x);
 void speed_change(int speed);
 void Button_trigger(char button);
 int Button_debouncer(char button);
@@ -40,6 +41,7 @@ void setup(){
     pinMode(Button_2, INPUT);
     pinMode(Button_3, INPUT);
     pinMode(PWM_OUT, OUTPUT);
+    pinMode(PWM_direction, OUTPUT);
     attachInterrupt(digitalPinToInterrupt(Button_1), Button_1_remapped, RISING);
     attachInterrupt(digitalPinToInterrupt(Button_2), Button_2_remapped, RISING);
     attachInterrupt(digitalPinToInterrupt(Button_3), Button_3_remapped, RISING);
@@ -61,10 +63,16 @@ void loop() {
   // put your main code here, to run repeatedly:
   Update_Display();
   if (state==1){
+    if (loop_times>600){
+      change_direction();
+      delay(500);
+      loop_times=0;
+    }
     digitalWrite(PWM_OUT, 1);
     delay(pwm_on);
     digitalWrite(PWM_OUT, 0);
     delay(pwm_off);
+    loop_times++;
   }
 }
 
@@ -142,20 +150,18 @@ void speed_change(int speed){
     pwm_on -= 2;
     pwm_off += 2;
   }
-  if (pwm_on > 0){
-    change_direction(1);
-  } else {
-    change_direction(-1);
-  }
 }
 
-void change_direction(int direction){
+void change_direction(){
   if (direction==1){
+    direction=0;
     digitalWrite(PWM_direction, 1);
   } else {
     digitalWrite(PWM_direction, 0);
+    direction=1;
   }
 }
+
 // pinMode(pin, OUTPUT);
 // }
 // void loop()
